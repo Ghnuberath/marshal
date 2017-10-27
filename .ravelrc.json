@@ -1,0 +1,6 @@
+{
+  "keygrip keys": ["marshal-keygrip"],
+  "redis host": "redis",
+  "redis port": 6379,
+  "docker connection config": {"socketPath": "/var/run/docker.sock"}
+}

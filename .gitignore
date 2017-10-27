@@ -1,0 +1,11 @@
+node_modules
+*.sublime-workspace
+npm-debug.log
+.vagrant
+docs/*
+reports/*
+test-dist/*
+/dist
+DreamMXUpdateMAP.xlsx
+.vscode
+.idea
