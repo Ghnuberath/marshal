@@ -12,7 +12,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/Ghnuberath/marshal"
   },
   "main": "app.js",
   "scripts": {
