@@ -6,7 +6,7 @@ Currently tested on Docker Engine API 1.30.x.
 
 ## Usage
 
-Drop `ghnuberath/marshal` into your stack:
+Drop `smcintyre/marshal` into your stack:
 
 *docker-compose.yml*
 ```yaml
@@ -17,7 +17,7 @@ services:
     #...
   marshal:
     marshal:
-    image: ghnuberath/marshal:1.0.0
+    image: smcintyre/marshal:1.0.0
     environment:
       STACK_NAME: 'my-stack'
       REFRESH_INTERVAL: 30000
@@ -49,13 +49,13 @@ docker swarm init
 ### Run the test stack
 ```bash
 # build test container
-docker build -t ghnuberath/testing-marshal --no-cache ./test
+docker build -t smcintyre/testing-marshal --no-cache ./test
 # build marshal
-docker build -t ghnuberath/marshal .
+docker build -t smcintyre/marshal .
 # deploy stack
 docker stack deploy -c docker-compose.yml marshal-test
 # rebuild test container
-docker build -t ghnuberath/testing-marshal --no-cache ./test
+docker build -t smcintyre/testing-marshal --no-cache ./test
 # watch it redeploy
 docker service logs -f marshal-test_marshal
 # remove stack when you're done

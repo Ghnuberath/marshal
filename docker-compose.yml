@@ -2,10 +2,10 @@ version: '3'
 
 services:
   test:
-    image: ghnuberath/testing-marshal
+    image: smcintyre/testing-marshal
 
   marshal:
-    image: ghnuberath/marshal
+    image: smcintyre/marshal
     environment:
       STACK_NAME: 'marshal-test'
       REFRESH_INTERVAL: 30000
