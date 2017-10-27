@@ -19,7 +19,4 @@ app.registerParameter('stack name', true, process.env.STACK_NAME);
 
 app.modules('./modules');
 
-(async () => {
-  await app.init();
-  await app.listen();
-})();
+app.init().then(app.listen);

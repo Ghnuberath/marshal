@@ -27,13 +27,13 @@ class Marshal extends Module {
 
   pullImage (imageName) {
     return new Promise((resolve, reject) => {
-      const opts = {
-        fromImage: imageName
-      };
       // initiate pull
-      this.docker.createImage(opts, (err, result) => {
+      this.docker.pull(imageName, (err, stream) => {
         if (err) return reject(err);
-        return resolve(result);
+        this.docker.modem.followProgress(stream, (err, result) => {
+          if (err) return reject(err);
+          return resolve(result);
+        });
       });
     });
   }
@@ -126,6 +126,7 @@ class Marshal extends Module {
         .filter(s => s.Spec.TaskTemplate.ContainerSpec.Image.indexOf('ghnuberath/marshal') < 0);
       const toUpdate = (await Promise.all(services.map(s => {
         return this.checkForUpdates(s.Spec.TaskTemplate.ContainerSpec.Image, new Date(s.UpdatedAt)).then(isStale => {
+          console.dir(s, {depth: null});
           s.stale = isStale;
           return s;
         });
