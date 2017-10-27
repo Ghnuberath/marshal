@@ -21,8 +21,6 @@ services:
     environment:
       STACK_NAME: 'my-stack'
       REFRESH_INTERVAL: 30000
-    depends_on:
-      - redis
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     deploy:
