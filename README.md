@@ -17,7 +17,7 @@ services:
     #...
   marshal:
     marshal:
-    image: smcintyre/marshal:1.0.0
+    image: smcintyre/marshal:1.0.1
     environment:
       STACK_NAME: 'my-stack'
       REFRESH_INTERVAL: 30000
