@@ -17,7 +17,7 @@ services:
     #...
   marshal:
     marshal:
-    image: ghnuberath/marshal
+    image: ghnuberath/marshal:1.0.0
     environment:
       STACK_NAME: 'my-stack'
       REFRESH_INTERVAL: 30000
