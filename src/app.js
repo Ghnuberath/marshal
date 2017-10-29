@@ -19,4 +19,4 @@ app.registerParameter('stack name', true, process.env.STACK_NAME);
 
 app.modules('./modules');
 
-app.init().then(app.listen);
+app.start();

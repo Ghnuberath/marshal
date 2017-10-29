@@ -123,10 +123,10 @@ class Marshal extends Module {
     this.interval = setInterval(async () => {
       if (busy) return;
       const services = (await this.listServices())
-        .filter(s => s.Spec.TaskTemplate.ContainerSpec.Image.indexOf('ghnuberath/marshal') < 0);
+        .filter(s => s.Spec.TaskTemplate.ContainerSpec.Image.indexOf('smcintyre/marshal') < 0);
       const toUpdate = (await Promise.all(services.map(s => {
+        // console.dir(services, {depth: null});
         return this.checkForUpdates(s.Spec.TaskTemplate.ContainerSpec.Image, new Date(s.UpdatedAt)).then(isStale => {
-          console.dir(s, {depth: null});
           s.stale = isStale;
           return s;
         });

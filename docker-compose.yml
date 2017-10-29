@@ -5,7 +5,7 @@ services:
     image: smcintyre/testing-marshal
 
   marshal:
-    image: smcintyre/marshal
+    image: smcintyre/marshal:1.1.0
     environment:
       STACK_NAME: 'marshal-test'
       REFRESH_INTERVAL: 30000
