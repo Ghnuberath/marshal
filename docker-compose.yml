@@ -6,6 +6,8 @@ services:
 
   marshal:
     image: smcintyre/marshal:1.1.0
+    labels:
+      marshal.auth:
     environment:
       STACK_NAME: 'marshal-test'
       REFRESH_INTERVAL: 30000

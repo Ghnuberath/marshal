@@ -125,7 +125,7 @@ class Marshal extends Module {
       const services = (await this.listServices())
         .filter(s => s.Spec.TaskTemplate.ContainerSpec.Image.indexOf('smcintyre/marshal') < 0);
       const toUpdate = (await Promise.all(services.map(s => {
-        // console.dir(services, {depth: null});
+        console.dir(services, {depth: null});
         return this.checkForUpdates(s.Spec.TaskTemplate.ContainerSpec.Image, new Date(s.UpdatedAt)).then(isStale => {
           s.stale = isStale;
           return s;
