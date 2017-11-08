@@ -16,7 +16,7 @@ class Marshal extends Module {
   listServices () {
     return new Promise((resolve, reject) => {
       const opts = {
-        label: `com.docker.stack.namespace=${this.params.get('stack name')}`
+        filters: `{"label": ["com.docker.stack.namespace=${this.params.get('stack name')}"]}`
       };
       this.docker.listServices(opts, (err, result) => {
         if (err) return reject(err);

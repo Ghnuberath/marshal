@@ -17,7 +17,7 @@ services:
     #...
   marshal:
     marshal:
-    image: smcintyre/marshal:1.0.1
+    image: smcintyre/marshal:1.2.0
     environment:
       STACK_NAME: 'my-stack'
       REFRESH_INTERVAL: 30000
@@ -66,7 +66,7 @@ docker swarm init
 # build test container
 docker build -t smcintyre/testing-marshal --no-cache ./test
 # build marshal
-docker build -t smcintyre/marshal:1.1.0 .
+docker build -t smcintyre/marshal:1.2.0 .
 # deploy stack
 docker stack deploy -c docker-compose.yml marshal-test
 # rebuild test container
