@@ -5,12 +5,41 @@ const inject = require('ravel').inject;
 const prelisten = Module.prelisten;
 const preclose = Module.preclose;
 
-@inject('dockerode')
+@inject('fs', 'dockerode')
 class Marshal extends Module {
-  constructor (Dockerode) {
+  constructor (fs, Dockerode) {
     super();
+    this.fs = fs;
     const dockerConfig = this.params.get('docker connection config');
     this.docker = new Dockerode(dockerConfig);
+    this.auths = new Map();
+  }
+
+  @prelisten
+  async readAuth () {
+    return new Promise((resolve, reject) => {
+      this.fs.readFile('/config.json', {flag: 'r'}, (err, data) => {
+        try {
+          if (!err) {
+            const authJSON = JSON.parse(data);
+            Object.keys(authJSON.auths)
+            .filter(a => authJSON.auths[a].auth !== undefined) // defensive driving
+            .forEach(a => {
+              const base64Auth = (new Buffer(authJSON.auths[a].auth, 'base64')).toString().split(':');
+              this.auths.set(a, {
+                username: base64Auth[0],
+                password: base64Auth[1]
+              });
+            });
+          }
+        } catch (err) {
+          this.log.warn('Unable to parse Docker config.json');
+          this.log.warn(err.stack);
+        } finally {
+          resolve();
+        }
+      });
+    });
   }
 
   listServices () {
@@ -25,16 +54,26 @@ class Marshal extends Module {
     });
   }
 
+  getRegistryFromImage (imageName) {
+    return imageName.substring(0, imageName.indexOf('/'));
+  }
+
   pullImage (imageName) {
     return new Promise((resolve, reject) => {
-      // initiate pull
-      this.docker.pull(imageName, (err, stream) => {
+      const args = [imageName];
+      const registryName = this.getRegistryFromImage(imageName);
+      if (this.auths.has(registryName)) {
+        args.push({'authconfig': this.auths.get(registryName)});
+      }
+      args.push((err, stream) => {
         if (err) return reject(err);
         this.docker.modem.followProgress(stream, (err, result) => {
           if (err) return reject(err);
           return resolve(result);
         });
       });
+      // initiate pull
+      this.docker.pull(...args);
     });
   }
 

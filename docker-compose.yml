@@ -6,13 +6,9 @@ services:
 
   marshal:
     image: smcintyre/marshal:1.2.0
-    labels:
-      marshal.auth:
     environment:
       STACK_NAME: 'marshal-test'
       REFRESH_INTERVAL: 30000
-    depends_on:
-      - redis
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     deploy:

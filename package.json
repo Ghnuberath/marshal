@@ -25,7 +25,7 @@
     "redis-mock": "0.20.0",
     "dockerode": "2.5.3",
     "es6-promisify": "4.0.0",
-    "ravel": "0.22.5"
+    "ravel": "0.23.0"
   },
   "devDependencies": {
     "del": "2.2.0",
