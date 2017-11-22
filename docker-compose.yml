@@ -2,10 +2,10 @@ version: '3'
 
 services:
   test:
-    image: smcintyre/testing-marshal
+    image: localhost:5000/testing-marshal
 
   marshal:
-    image: smcintyre/marshal:1.2.0
+    image: smcintyre/marshal:1.3.0
     environment:
       STACK_NAME: 'marshal-test'
       REFRESH_INTERVAL: 30000

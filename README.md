@@ -17,7 +17,7 @@ services:
     #...
   marshal:
     marshal:
-    image: smcintyre/marshal:1.2.0
+    image: smcintyre/marshal:1.3.0
     environment:
       STACK_NAME: 'my-stack'
       REFRESH_INTERVAL: 30000
@@ -63,16 +63,20 @@ docker swarm init
 
 ### Run the test stack
 ```bash
-# build test container
-docker build -t smcintyre/testing-marshal --no-cache ./test
+# run registry
+docker run -d -p 5000:5000 --restart always --name registry registry:2
+# build, push, rm test container
+docker build -t localhost:5000/testing-marshal --no-cache ./test && docker push localhost:5000/testing-marshal && docker rmi localhost:5000/testing-marshal
 # build marshal
-docker build -t smcintyre/marshal:1.2.0 .
+docker build -t smcintyre/marshal:1.3.0 .
 # deploy stack
 docker stack deploy -c docker-compose.yml marshal-test
-# rebuild test container
-docker build -t smcintyre/testing-marshal --no-cache ./test
+# rebuild, push, rm test container
+docker build -t localhost:5000/testing-marshal --no-cache ./test && docker push localhost:5000/testing-marshal && docker rmi localhost:5000/testing-marshal
 # watch it redeploy
 docker service logs -f marshal-test_marshal
 # remove stack when you're done
 docker stack rm marshal-test
+# remove registry
+docker rm -f registry
 ```

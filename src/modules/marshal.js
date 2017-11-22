@@ -78,6 +78,7 @@ class Marshal extends Module {
   }
 
   async checkForUpdates (imageDigestName, serviceCreationTime) {
+    // https://github.com/moby/moby/issues/29203 means we have to remove the tag from the filter and filter for tags locally
     const sha = imageDigestName.indexOf('@');
     const imageName = sha >= 0 ? imageDigestName.substring(0, sha) : imageDigestName;
     this.log.debug(`Checking for updates for ${imageName}`);
@@ -89,16 +90,38 @@ class Marshal extends Module {
     }
     return new Promise((resolve, reject) => {
       const opts = {
-        digests: 1,
+        // digests: 1, https://github.com/moby/moby/issues/29203 means we'll need to get digest info in a second query :(
         // filters: `{"reference": ["${imageName}"], "since": ["${imageDigestName}"]}`
         filters: `{"reference": ["${imageName}"]}`
       };
       this.docker.listImages(opts, (err, result) => {
         if (err) return reject(err);
-        resolve(result.filter(i => {
-          return serviceCreationTime < new Date(i.Created * 1000);
-        }).length > 0);
+        const latest = result.filter(i => serviceCreationTime < new Date(i.Created * 1000)).reduce((acc, next) => {
+          return next.Created > acc.Created ? next : acc;
+        }, {Created: -1});
+        // if there is a newer image than the one we are running, get the digests
+        if (latest.Created > 0) {
+          resolve(this.inspectImage(imageName));
+        } else {
+          resolve(false);
+        }
+        latest.Created > 0 ? resolve(latest) : resolve(false);
       });
+    });
+  }
+
+  inspectImage (imageName) {
+    return new Promise((resolve, reject) => {
+      try {
+        const image = this.docker.getImage(imageName);
+        image.inspect((err, result) => {
+          if (err) return reject(err);
+          return resolve(result);
+        });
+      } catch (err) {
+        this.log.error(`Could not inspect service.`);
+        this.log.error(err.stack);
+      }
     });
   }
 
@@ -117,11 +140,24 @@ class Marshal extends Module {
     });
   }
 
-  async updateService (serviceDescriptor) {
+  async updateService (serviceDescriptor, updateDescriptor) {
     const inspect = await this.inspectService(serviceDescriptor);
     const spec = Object.assign(inspect.Spec);
     spec.version = parseInt(inspect.Version.Index);
     spec.TaskTemplate.ForceUpdate = parseInt(spec.TaskTemplate.ForceUpdate) + 1;
+    if (!Array.isArray(updateDescriptor.RepoDigests) || updateDescriptor.RepoDigests.length === 0) {
+      throw new Error(`Image for service ${spec.Name} has no digests, and cannot be updated.`);
+    }
+    // search RepoDigests for the one matching the original repo
+    const digestName = updateDescriptor.RepoDigests.reduce((acc, next) => {
+      if (next.indexOf(spec.Name) === 0) return next;
+    });
+    // chop off sha for use
+    const digest = digestName.substring(digestName.indexOf('@'));
+    const sha = spec.TaskTemplate.ContainerSpec.Image.indexOf('@');
+    const imageName = sha >= 0 ? spec.TaskTemplate.ContainerSpec.Image.substring(0, sha) : spec.TaskTemplate.ContainerSpec.Image;
+    this.log.info(`Updating service ${spec.Name} to use image ${imageName}${digest}.`);
+    spec.TaskTemplate.ContainerSpec.Image = `${imageName}${digest}`;
     return new Promise((resolve, reject) => {
       try {
         const service = this.docker.getService(serviceDescriptor.ID);
@@ -175,7 +211,7 @@ class Marshal extends Module {
         try {
           await Promise.all(toUpdate.map(s => {
             this.log.info(`Service ${s.Spec.Name} requires updating...`);
-            return this.updateService(s);
+            return this.updateService(s, s.stale);
           }));
         } catch (updateErr) {
           this.log.error('Could not update services');
